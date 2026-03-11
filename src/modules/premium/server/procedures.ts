@@ -1,0 +1,39 @@
+import { eq, count } from "drizzle-orm";
+
+import { db } from "@/db";
+import { agents, meetings } from "@/db/schema";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+} from "@/trpc/init";
+
+export const premiumRouter = createTRPCRouter({
+  // Subscription features disabled - Polar removed
+  getCurrentSubscription: protectedProcedure.query(async () => {
+    return null; // No subscription - all users have free access
+  }),
+  getProducts: protectedProcedure.query(async () => {
+    return []; // No products available
+  }),
+  getFreeUsage: protectedProcedure.query(async ({ ctx }) => {
+    // Just return usage stats without subscription check
+    const [userMeetings] = await db
+      .select({
+        count: count(meetings.id),
+      })
+      .from(meetings)
+      .where(eq(meetings.userId, ctx.auth.user.id));
+
+    const [userAgents] = await db
+      .select({
+        count: count(agents.id),
+      })
+      .from(agents)
+      .where(eq(agents.userId, ctx.auth.user.id));
+
+    return {
+      meetingCount: userMeetings.count,
+      agentCount: userAgents.count,
+    };
+  })
+});
