@@ -9,11 +9,15 @@ import {
   ClockFadingIcon,
   CornerDownRightIcon,
   LoaderIcon,
+  Copy,
+  Check,
 } from "lucide-react"
+import { useState } from "react"
 
 import { cn, formatDuration } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge"
 import { GeneratedAvatar } from "@/components/generated-avatar"
+import { Button } from "@/components/ui/button"
 
 import { MeetingGetMany } from "../../types"
 
@@ -95,5 +99,42 @@ export const columns: ColumnDef<MeetingGetMany[number]>[] = [
         {row.original.duration ? formatDuration(row.original.duration) : "No duration"}
       </Badge>
     ),
+  },
+  {
+    id: "actions",
+    header: "Invite",
+    cell: ({ row }) => {
+      const [copied, setCopied] = useState(false);
+      const meetingUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/call/${row.original.id}`;
+
+      const copyToClipboard = async () => {
+        await navigator.clipboard.writeText(meetingUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      };
+
+      return (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            copyToClipboard();
+          }}
+        >
+          {copied ? (
+            <>
+              <Check className="size-4 mr-1" />
+              Copied
+            </>
+          ) : (
+            <>
+              <Copy className="size-4 mr-1" />
+              Copy Link
+            </>
+          )}
+        </Button>
+      );
+    },
   },
 ];
