@@ -1,8 +1,5 @@
-import { db } from '@/db';
-import { agents, meetings } from '@/db/schema';
 import { auth } from '@/lib/auth';
 import { initTRPC, TRPCError } from '@trpc/server';
-import { count, eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { cache } from 'react';
 
@@ -41,8 +38,8 @@ export const protectedProcedure = baseProcedure.use(async ({ ctx, next }) => {
   return next({ ctx: { ...ctx, auth: session } });
 });
 
-// Premium procedure - without Polar, just checks usage limits
-export const premiumProcedure = (entity: "meetings" | "agents") =>
+// Premium procedure - without Polar, all users have unlimited access
+export const premiumProcedure = (_entity: "meetings" | "agents") =>
   protectedProcedure.use(async ({ ctx, next }) => {
     // Removed Polar subscription check - now all users have unlimited access
     return next({ ctx: { ...ctx } });

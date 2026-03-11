@@ -37,6 +37,41 @@ const statusColorMap = {
   processing: "bg-gray-300/20 text-gray-800 border-gray-800/5",
 }
 
+// Copy button component - extracted to avoid useState in cell
+const CopyLinkButton = ({ meetingId }: { meetingId: string }) => {
+  const [copied, setCopied] = useState(false);
+  const meetingUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/call/${meetingId}`;
+
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(meetingUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={(e) => {
+        e.stopPropagation();
+        copyToClipboard();
+      }}
+    >
+      {copied ? (
+        <>
+          <Check className="size-4 mr-1" />
+          Copied
+        </>
+      ) : (
+        <>
+          <Copy className="size-4 mr-1" />
+          Copy Link
+        </>
+      )}
+    </Button>
+  );
+};
+
 export const columns: ColumnDef<MeetingGetMany[number]>[] = [
   {
     accessorKey: "name",
@@ -103,38 +138,8 @@ export const columns: ColumnDef<MeetingGetMany[number]>[] = [
   {
     id: "actions",
     header: "Invite",
-    cell: ({ row }) => {
-      const [copied, setCopied] = useState(false);
-      const meetingUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/call/${row.original.id}`;
-
-      const copyToClipboard = async () => {
-        await navigator.clipboard.writeText(meetingUrl);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      };
-
-      return (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            copyToClipboard();
-          }}
-        >
-          {copied ? (
-            <>
-              <Check className="size-4 mr-1" />
-              Copied
-            </>
-          ) : (
-            <>
-              <Copy className="size-4 mr-1" />
-              Copy Link
-            </>
-          )}
-        </Button>
-      );
-    },
+    cell: ({ row }) => (
+      <CopyLinkButton meetingId={row.original.id} />
+    ),
   },
 ];
