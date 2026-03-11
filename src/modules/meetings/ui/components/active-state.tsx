@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { VideoIcon } from "lucide-react"
+import { VideoIcon, Copy, Check } from "lucide-react"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
@@ -11,6 +12,16 @@ interface Props {
 export const ActiveState = ({
   meetingId,
 }: Props) => {
+  const [copied, setCopied] = useState(false);
+
+  const meetingUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/call/${meetingId}`;
+
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(meetingUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="bg-white rounded-lg px-4 py-5 flex flex-col gap-y-8 items-center justify-center">
       <EmptyState
@@ -24,6 +35,14 @@ export const ActiveState = ({
             <VideoIcon />
             Join meeting
           </Link>
+        </Button>
+        <Button 
+          variant="outline" 
+          className="w-full lg:w-auto"
+          onClick={copyToClipboard}
+        >
+          {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+          {copied ? "Copied!" : "Copy invite link"}
         </Button>
       </div>
     </div>
